@@ -1,0 +1,7 @@
+CREATE DATABASE IF NOT EXISTS pixyproxy;
+
+CREATE USER IF NOT EXISTS 'pixyproxy'@'localhost' IDENTIFIED BY 'pixyproxy';
+
+GRANT ALL PRIVILEGES ON pixyproxy.* TO 'pixyproxy'@'localhost';
+
+FLUSH PRIVILEGES;
