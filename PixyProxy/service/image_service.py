@@ -1,9 +1,9 @@
 from typing import List, Optional
 from pydantic import BaseModel
-from .models import ImageDetail, ImageDetailCreate
-from .repositories import ImageRepositoryInterface
-from .exceptions import PixyProxyException, RecordNotFoundError
-from .db_context import DatabaseContext, get_current_db_context
+from core.models import ImageDetail, ImageDetailCreate
+from data.image_repository import ImageRepositoryInterface
+from core.exceptions import PixyProxyException, RecordNotFoundError
+from data.__init__ import DatabaseContext, get_current_db_context
 import traceback
 
 

@@ -1,5 +1,8 @@
-from .init import create_connection
-from .models import ImageDetail
+
+from core.models import ImageDetail, ImageDetailCreate, Image
+from openai import OpenAI
+from datetime import datetime
+from typing import Optional
 
 
 
@@ -50,7 +53,7 @@ class MySQLImageRepository(ImageRepositoryInterface):
         return cursor.lastrowid
 
     def get_image_file(self, guid):
-         cursor = self.connection.cursor()
+        cursor = self.connection.cursor()
         cursor.execute(
             "SELECT filename FROM images WHERE guid = %s",
             (guid,),
@@ -71,3 +74,39 @@ class MySQLImageRepository(ImageRepositoryInterface):
             "updated_at": result[5],
         }
         return result_dict
+
+class ImageGenerator:
+    def __init__(self, image_repo: ImageRepositoryInterface):
+        self.image_repo = image_repo
+        self.client = OpenAI()
+
+    def generate_image(self, image: ImageDetailCreate) -> Optional[Image]:
+        # Implementation of the create image use case
+        response = self.client.images.generate(
+            model="dall-e-3",
+            prompt=image.prompt,  # Assuming the ImageDetailCreate model has a 'prompt' field
+            size="1024x1024",
+            quality="standard",
+            n=1,
+            timeout=100
+        )
+
+        if response.data:
+            image_url = response.data[0].url
+            # Generate a unique filename for the new image
+            filename = f"{image.prompt.replace(' ', '_')}.png"
+            # Create a new Image object with the generated data
+            new_image = Image(
+                prompt=image.prompt,
+                guid=image.prompt.replace(' ', '_'),
+                filename=filename,
+                id=None,  # This will be set by the database
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            )
+            # Save the new image to the database
+            new_image_id = self.image_repo.create_image(new_image)
+            new_image.id = new_image_id
+            return new_image
+
+        return None

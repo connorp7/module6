@@ -1,14 +1,15 @@
 import traceback
 
+import sys
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from core.exceptions import ImageException, EXCEPTION_STATUS_CODES
+from core.exceptions import PixyProxyException, EXCEPTION_STATUS_CODES
 from web.middleware import LoggingMiddleware, RequestIdMiddleware
 from web.routers import public_images, private_images
 
 app = FastAPI()
-
+print(sys.path)
 # Register routers
 
 # Include the router with a prefix
@@ -20,8 +21,8 @@ app.add_middleware(LoggingMiddleware)  # type: ignore
 app.add_middleware(RequestIdMiddleware)  # type: ignore
 
 
-@app.exception_handler(ImageException)
-async def handle_image_exception(_request: Request, exc: ImageException):
+@app.exception_handler(PixyProxyException)
+async def handle_image_exception(_request: Request, exc: PixyProxyException):
     # Get the status code from our mapping or default to 500 if not found
     status_code = EXCEPTION_STATUS_CODES.get(type(exc), 500)
     traceback_string = traceback.format_exc()

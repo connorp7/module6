@@ -8,11 +8,13 @@ from urllib.parse import unquote_plus
 
 router = APIRouter()
 
-@router.post("/image", status_code=201, summary="Add a new image. Requires an admin user.")
+@router.post("/image/", status_code=201, summary="Add a new image. Requires an admin user.")
 async def add_image(image: ImageDetailCreate,
                     service: ImageServiceInterface = Depends(get_image_service),
                     _user: User = Depends(require_admin_user)):
     return service.create_image(image)
+    
+   
 
 @router.get("/image/{guid}", summary="Get an image by GUID.")
 def get_image_by_guid(guid: str,
@@ -20,7 +22,7 @@ def get_image_by_guid(guid: str,
                     _user: User = Depends(require_admin_user)):
     return service.get_image_by_guid(guid)
 
-@router.get("/image", summary="Get all images.")
+@router.get("/image/", summary="Get all images.")
 def get_all_images(service: ImageServiceInterface = Depends(get_image_service),
                     _user: User = Depends(require_admin_user)):
     return service.get_all_images()

@@ -3,12 +3,12 @@ from core.exceptions import RecordNotFoundError
 from core.models import ImageDetail, ImageDetailCreate, User
 from service.image_service import ImageServiceInterface
 from typing import List
-from web.dependencies import get_image_service, require_admin_user
+from web.dependencies import get_image_service, require_admin_user, require_current_user
 from urllib.parse import unquote_plus
 
 router = APIRouter()
 
-@router.post("/image", status_code=201, summary="Add a new image. Requires an admin user.")
+@router.post("/image/", status_code=201, summary="Add a new image. Requires an admin user.")
 async def add_image(image: ImageDetailCreate,
                     service: ImageServiceInterface = Depends(get_image_service),
                     _user: User = Depends(require_current_user)):
@@ -23,7 +23,7 @@ def get_image_by_guid(guid: str,
     except RecordNotFoundError:
         raise HTTPException(status_code=404, detail="Image not found.")
 
-@router.get("/image", summary="Get all images.")
+@router.get("/image/", summary="Get all images.")
 def get_all_images(service: ImageServiceInterface = Depends(get_image_service),
                     _user: User = Depends(require_current_user)):
     return service.get_all_images()
