@@ -14,7 +14,6 @@ async def add_image(image: ImageDetailCreate,
                     _user: User = Depends(require_admin_user)):
     return service.create_image(image)
     
-   
 
 @router.get("/image/{guid}", summary="Get an image by GUID.")
 def get_image_by_guid(guid: str,

@@ -73,14 +73,19 @@ class ImageServiceInterface:
 
 
 class ImageService(ImageServiceInterface):
-    def __init__(self, image_repo: ImageRepositoryInterface):
-        self.image_repo = image_repo
+    def __init__(self, image_repository: ImageRepositoryInterface):
+        self.image_repository = image_repository
 
     def create_image(self, image: ImageDetailCreate) -> ImageDetail:
+        try:
+            image = ImageDetailCreate(**image.dict())
+        except ValidationError as e:
+            raise ConstraintViolationError(str(e)) from e
+        
         with DatabaseContext() as db:
             try:
                 db.begin_transaction()
-                image_id = self.image_repo.create_image(image)
+                image_id = self.image_repository.create_image(image)
                 db.commit_transaction()
                 return ImageDetail(id=image_id, **image.dict())
             except PixyProxyException as known_exc:

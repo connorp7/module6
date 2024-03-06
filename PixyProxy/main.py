@@ -1,6 +1,6 @@
 import traceback
 
-import sys
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
@@ -9,7 +9,7 @@ from web.middleware import LoggingMiddleware, RequestIdMiddleware
 from web.routers import public_images, private_images
 
 app = FastAPI()
-print(sys.path)
+
 # Register routers
 
 # Include the router with a prefix
