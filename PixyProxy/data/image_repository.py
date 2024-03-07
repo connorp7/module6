@@ -1,6 +1,6 @@
 from core import make_guid
 from core.exceptions import DBConnectionError
-from core.models import ImageDetail, ImageDetailCreate, Image
+from core.models import ImageDetail, ImageDetailCreate
 from openai import OpenAI
 from datetime import datetime
 from typing import Optional
@@ -11,7 +11,7 @@ from .generator import ImageGenerator
 
 class ImageRepositoryInterface:
 
-    def get_image_by_guid(self, guid):
+    def get_image_details_by_guid(self, guid):
         # Implementation of the get image by guid use case
         pass
 
@@ -54,17 +54,16 @@ class MySQLImageRepository(ImageRepositoryInterface):
         if not db_context:
             raise DBConnectionError("No database connection found")
         try:
-            db_context.cursor.execute("SELECT guid, filename, prompt FROM images WHERE guid = %s", (guid,))
+            db_context.cursor.execute("SELECT * FROM images WHERE guid = %s", (guid,))
             row = db_context.cursor.fetchone()  # fetch the result
         except Exception as e:
             db_context.rollback_transaction()
             raise  # re-raise the exception
-
         if row:
             return ImageDetail(guid=row[1], filename=row[2], prompt=row[3])
-        return None
+
         
-    def get_all_images(self):
+    def get_all_images(self) -> list[ImageDetail]:
         db_context = get_current_db_context()
         if not db_context:
             raise DBConnectionError()
@@ -88,7 +87,7 @@ class MySQLImageRepository(ImageRepositoryInterface):
             db_context.rollback_transaction()
             raise  # re-raise the exception
         if result:
-            return result[0]
+            return result[1]
         return None
 
     @staticmethod

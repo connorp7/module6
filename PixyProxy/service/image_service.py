@@ -26,7 +26,7 @@ class ImageServiceInterface:
         """
         pass
 
-    def get_image_by_guid(self, guid: str) -> Optional[ImageDetail]:
+    def get_image_by_guid(self, guid: str) -> ImageDetail:
         """
         Retrieves an image from the database by its GUID.
 
@@ -99,14 +99,14 @@ class ImageService(ImageServiceInterface):
                 db.rollback_transaction()
                 raise PixyProxyException("An unexpected error occurred while processing your request.") from e
 
-    def get_image_by_guid(self, guid: str) -> Optional[ImageDetail]:
+    def get_image_by_guid(self, guid: str) -> ImageDetail:
+
         with DatabaseContext() as db:
             try:
                 db.begin_transaction()
-                print(guid)
-                image = self.image_repository.get_image_by_guid(guid)
+                image = self.image_repository.get_image_details_by_guid(guid)
                 db.commit_transaction()
-                print(image)
+
                 if image is None:
                     raise RecordNotFoundError()
                 return image

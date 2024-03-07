@@ -25,6 +25,7 @@ db_pool = pooling.MySQLConnectionPool(pool_name="pool", pool_size=10, **config)
 class DatabaseContext:
     def __init__(self):
         self._cursor = None
+        
 
     def __enter__(self):
         self.conn = db_pool.get_connection()
@@ -65,5 +66,4 @@ class DatabaseContext:
 # Provide a global function to fetch the current context
 def get_current_db_context():
     db_context = getattr(local_storage, "db_context", None)
-    print(f'db_context: {db_context}')
     return db_context

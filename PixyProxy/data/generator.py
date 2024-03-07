@@ -13,6 +13,7 @@ class ImageGenerator:
     def __init__(self):
         self.client = OpenAI(base_url='http://aitools.cs.vt.edu:7860/openai/v1', api_key='aitools')
 
+
     def generate_image(self, image: ImageDetailCreate) -> str:
         # Implementation of the create image use case
         response = self.client.images.generate(

@@ -10,7 +10,4 @@ class ImageDetail(ImageDetailCreate):
     guid: str
     filename: str
 
-class Image(ImageDetail):
-    id: int
-    created_at: datetime
-    updated_at: datetime
+
