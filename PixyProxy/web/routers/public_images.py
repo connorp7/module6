@@ -1,32 +1,40 @@
 from fastapi import APIRouter, Depends, HTTPException
 from core.exceptions import RecordNotFoundError
-from core.models import ImageDetail, ImageDetailCreate, User
+from core.models import ImageDetail, ImageDetailCreate
 from service.image_service import ImageServiceInterface
 from typing import List
-from web.dependencies import get_image_service, require_admin_user
+from web.dependencies import get_image_service
 from urllib.parse import unquote_plus
 
 router = APIRouter()
 
-@router.post("/image/", status_code=201, summary="Add a new image. Requires an admin user.")
+@router.post("/", response_model=ImageDetail, status_code=200)
 async def add_image(image: ImageDetailCreate,
-                    service: ImageServiceInterface = Depends(get_image_service),
-                    _user: User = Depends(require_admin_user)):
-    return service.create_image(image)
+                    service: ImageServiceInterface = Depends(get_image_service)):
+    try:
+        return service.create_image(image)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
     
 
-@router.get("/image/{guid}", summary="Get an image by GUID.")
+@router.get("/{guid}", status_code=200, summary="Get an image by GUID.")
 def get_image_by_guid(guid: str,
-                    service: ImageServiceInterface = Depends(get_image_service),
-                    _user: User = Depends(require_admin_user)):
-    return service.get_image_by_guid(guid)
+                    service: ImageServiceInterface = Depends(get_image_service)):
+    try:
+        return service.get_image_by_guid(guid)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
-@router.get("/image/", summary="Get all images.")
-def get_all_images(service: ImageServiceInterface = Depends(get_image_service),
-                    _user: User = Depends(require_admin_user)):
-    return service.get_all_images()
+@router.get("/", status_code=200, summary="Get all images.")
+def get_all_images(service: ImageServiceInterface = Depends(get_image_service)):
+    try:
+        return service.get_all_images()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/image/{guid}/content", summary="Get image file by GUID.")
-def get_image_file(guid: str, service: ImageServiceInterface = Depends(get_image_service), 
-                    _user: User = Depends(require_admin_user)):
-    return service.get_image_file(guid)
+@router.get("/{guid}/content", status_code=200, summary="Get image file by GUID.")
+def get_image_file(guid: str, service: ImageServiceInterface = Depends(get_image_service)):
+    try:
+        return service.get_image_file(guid)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

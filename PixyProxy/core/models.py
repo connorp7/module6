@@ -14,8 +14,3 @@ class Image(ImageDetail):
     id: int
     created_at: datetime
     updated_at: datetime
-
-class User(BaseModel):
-    username: str
-    password: str
-    class_key: str

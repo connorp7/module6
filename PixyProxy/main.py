@@ -6,15 +6,14 @@ from fastapi.responses import JSONResponse
 
 from core.exceptions import PixyProxyException, EXCEPTION_STATUS_CODES
 from web.middleware import LoggingMiddleware, RequestIdMiddleware
-from web.routers import public_images, private_images
+from web.routers import public_images
 
 app = FastAPI()
 
 # Register routers
 
 # Include the router with a prefix
-app.include_router(public_images.router, prefix="/public", tags=["Public Endpoints"])
-app.include_router(private_images.router, prefix="/private", tags=["Private Per-user Endpoints"])
+app.include_router(public_images.router, prefix="/image")
 
 # Innermost first
 app.add_middleware(LoggingMiddleware)  # type: ignore

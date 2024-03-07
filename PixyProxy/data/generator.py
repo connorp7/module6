@@ -1,9 +1,10 @@
 
 import requests
+from typing import Optional
 from urllib.parse import urlparse
 import os
 import uuid
-from data.image_repository import ImageRepositoryInterface 
+from core.models import ImageDetailCreate, Image
 
 def save_image_from_url(self, image_url: str, filename: str):
     response = requests.get(image_url, stream=True)
@@ -12,12 +13,16 @@ def save_image_from_url(self, image_url: str, filename: str):
         for chunk in response.iter_content(chunk_size=8192):
             file.write(chunk)
 
+def extract_filename_from_url(url):
+    url_path = urlparse(url).path
+    filename = os.path.basename(url_path)
+    return filename        
+
 class ImageGenerator:
-    def __init__(self, image_repo: ImageRepositoryInterface):
-        self.image_repo = image_repo
+    def __init__(self):
         self.client = OpenAI(base_url='http://aitools.cs.vt.edu:7860/openai/v1', api_key = 'aitools')
 
-    def generate_image(self, image: ImageDetailCreate) -> Optional[Image]:
+    def generate_image(self, image: ImageDetailCreate) -> str:
         # Implementation of the create image use case
         response = self.client.images.generate(
             model="dall-e-3",
@@ -28,24 +33,14 @@ class ImageGenerator:
             timeout=100
         )
 
-        if response.data:
-            image_url = response.data[0].url
-            
-            # Generate a unique filename for the new image
-            filename = f"{uuid.uuid4()}.png"
-            self.save_image_from_url(image_url)
-            # Create a new Image object with the generated data
-            new_image = Image(
-                prompt=image.prompt,
-                guid=image.prompt.replace(' ', '_'),
-                filename=filename,
-                id=None,  # This will be set by the database
-                created_at=datetime.now(),
-                updated_at=datetime.now()
-            )
-            # Save the new image to the database
-            new_image_id = self.image_repo.create_image(new_image)
-            new_image.id = new_image_id
-            return new_image
+        image_url = response.data[0].url
 
-        return None
+        response = requests.get(image_url)
+        if response.status_code == 200:
+            filename = extract_filename_from_url(image_url)
+            file_path = os.path.join('images', filename)
+            with open(file_path, 'wb') as file:
+                file.write(response.content)
+            return filename
+        else:
+            raise Exception(f"Failed to download image")

@@ -5,6 +5,7 @@ from data.image_repository import ImageRepositoryInterface
 from core.exceptions import PixyProxyException, RecordNotFoundError
 from data.__init__ import DatabaseContext, get_current_db_context
 import traceback
+from data.generator import ImageGenerator
 
 
 class ImageServiceInterface:
@@ -73,14 +74,11 @@ class ImageServiceInterface:
 
 
 class ImageService(ImageServiceInterface):
-    def __init__(self, image_repository: ImageRepositoryInterface):
+    def __init__(self, image_repository: ImageRepositoryInterface, image_generator: ImageGenerator):
         self.image_repository = image_repository
+        self.image_generator = image_generator
 
     def create_image(self, image: ImageDetailCreate) -> ImageDetail:
-        try:
-            image = ImageDetailCreate(**image.dict())
-        except ValidationError as e:
-            raise ConstraintViolationError(str(e)) from e
         
         with DatabaseContext() as db:
             try:
@@ -101,7 +99,7 @@ class ImageService(ImageServiceInterface):
         with DatabaseContext() as db:
             try:
                 db.begin_transaction()
-                image = self.image_repo.get_image_by_guid(guid)
+                image = self.image_repository.get_image_by_guid(guid)
                 db.commit_transaction()
                 if image is None:
                     raise RecordNotFoundError()
@@ -119,7 +117,7 @@ class ImageService(ImageServiceInterface):
         with DatabaseContext() as db:
             try:
                 db.begin_transaction()
-                images = self.image_repo.get_all_images()
+                images = self.image_repository.get_all_images()
                 db.commit_transaction()
                 return images
             except PixyProxyException as known_exc:
@@ -135,7 +133,7 @@ class ImageService(ImageServiceInterface):
         with DatabaseContext() as db:
             try:
                 db.begin_transaction()
-                filename = self.image_repo.get_image_file(guid)
+                filename = self.image_repository.get_image_file(guid)
                 db.commit_transaction()
                 if filename is None:
                     raise RecordNotFoundError()
