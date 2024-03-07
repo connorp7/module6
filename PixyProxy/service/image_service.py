@@ -2,14 +2,14 @@ from typing import List, Optional
 from pydantic import BaseModel
 from core.models import ImageDetail, ImageDetailCreate
 from data.image_repository import ImageRepositoryInterface
-from core.exceptions import PixyProxyException, RecordNotFoundError
+from core.exceptions import PixyProxyException, RecordNotFoundError, ConstraintViolationError
 from data.__init__ import DatabaseContext, get_current_db_context
 import traceback
 from data.generator import ImageGenerator
 
 
 class ImageServiceInterface:
-    def create_image(self, image: ImageDetailCreate) -> ImageDetail:
+    def create_image(self, image: ImageDetailCreate) -> dict:
         """
         Creates a new image in the database.
 
@@ -78,14 +78,18 @@ class ImageService(ImageServiceInterface):
         self.image_repository = image_repository
         self.image_generator = image_generator
 
-    def create_image(self, image: ImageDetailCreate) -> ImageDetail:
-        
+    def create_image(self, image: ImageDetailCreate) -> (dict):
+
+        try:
+            image = ImageDetailCreate(**image.dict())
+        except Exception as e:
+            raise ConstraintViolationError(str(e))
         with DatabaseContext() as db:
             try:
                 db.begin_transaction()
-                image_id = self.image_repository.create_image(image)
+                image_dict = self.image_repository.create_image(image)
                 db.commit_transaction()
-                return ImageDetail(id=image_id, **image.dict())
+                return image_dict
             except PixyProxyException as known_exc:
                 traceback.print_exc()
                 db.rollback_transaction()
@@ -99,8 +103,10 @@ class ImageService(ImageServiceInterface):
         with DatabaseContext() as db:
             try:
                 db.begin_transaction()
+                print(guid)
                 image = self.image_repository.get_image_by_guid(guid)
                 db.commit_transaction()
+                print(image)
                 if image is None:
                     raise RecordNotFoundError()
                 return image

@@ -23,9 +23,3 @@ Based on the provided information, here are the use cases for the system:
     - **Preconditions**: Image GUID is valid.
     - **Postconditions**: User receives the image file.
     - **Normal Flow**: User sends a GET request to /image/{guid}/content. The system retrieves the image file associated with the provided GUID and returns it to the user.
-
-5. **Use Case: Perform Operations on Private Images**
-    - **Actor**: Authenticated User
-    - **Preconditions**: User is authenticated.
-    - **Postconditions**: User performs operations on private images.
-    - **Normal Flow**: User sends a request to any of the above endpoints with authentication credentials. After successful authentication, the system allows the user to perform the requested operation on private images.

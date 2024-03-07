@@ -5,7 +5,6 @@ import threading
 
 load_dotenv()
 
-
 # Database Configuration
 config = {
     'user': os.getenv('DB_USER'),
@@ -15,7 +14,6 @@ config = {
     'database': os.getenv('DB_NAME'),
     'raise_on_warnings': True,
 }
-
 
 # Create a thread-local storage
 local_storage = threading.local()
@@ -66,4 +64,6 @@ class DatabaseContext:
 
 # Provide a global function to fetch the current context
 def get_current_db_context():
-    return getattr(local_storage, "db_context", None)
+    db_context = getattr(local_storage, "db_context", None)
+    print(f'db_context: {db_context}')
+    return db_context
