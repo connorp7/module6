@@ -54,7 +54,7 @@ class MySQLImageRepository(ImageRepositoryInterface):
         if not db_context:
             raise DBConnectionError("No database connection found")
         try:
-            db_context.cursor.execute("SELECT * FROM images WHERE guid = %s", (guid,))
+            db_context.cursor.execute("SELECT guid, filename, prompt FROM images WHERE guid = %s", (guid,))
             row = db_context.cursor.fetchone()  # fetch the result
         except Exception as e:
             db_context.rollback_transaction()
@@ -90,14 +90,3 @@ class MySQLImageRepository(ImageRepositoryInterface):
             return result[1]
         return None
 
-    @staticmethod
-    def make_result_dict(result):
-        result_dict = {
-            "id": result[0],
-            "guid": result[1],
-            "filename": result[2],
-            "prompt": result[3],
-            "created_at": result[4],
-            "updated_at": result[5],
-        }
-        return result_dict
