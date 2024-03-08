@@ -6,7 +6,7 @@ import pytest
 from dotenv import load_dotenv
 import sys
 
-sys.path.insert(0, 'C:\\Users\\Connor\\AITools\\module6\\PixyProxy')
+sys.path.insert(0, 'C:\\Users\\Connor\\AIToolsForSWDelivery\\module6\\module6\\PixyProxy')
 from core.models import ImageDetail
 
 

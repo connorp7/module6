@@ -1,3 +1,4 @@
+import os
 from core import make_guid
 from core.exceptions import DBConnectionError
 from core.models import ImageDetail, ImageDetailCreate
@@ -54,13 +55,13 @@ class MySQLImageRepository(ImageRepositoryInterface):
         if not db_context:
             raise DBConnectionError("No database connection found")
         try:
-            db_context.cursor.execute("SELECT guid, filename, prompt FROM images WHERE guid = %s", guid)
-            row = db_context.cursor.fetchone()  # fetch the result
+            db_context.cursor.execute("SELECT guid, filename, prompt FROM images WHERE guid = %s", (guid,))
+            result = db_context.cursor.fetchone()  # fetch the result
         except Exception as e:
             db_context.rollback_transaction()
             raise  # re-raise the exception
-        if row:
-            return ImageDetail(guid=row[0], filename=row[1], prompt=row[2])
+        if result:
+            return ImageDetail(**result)
 
         
     def get_all_images(self) -> list[ImageDetail]:
@@ -68,25 +69,28 @@ class MySQLImageRepository(ImageRepositoryInterface):
         if not db_context:
             raise DBConnectionError()
         try:
-            db_context.cursor.execute("SELECT * FROM images")
-            rows = db_context.cursor.fetchall()  # fetch the results
+            db_context.cursor.execute("SELECT guid, filename, prompt FROM images")
+            results = db_context.cursor.fetchall()  # fetch the results
         except Exception as e:
             db_context.rollback_transaction()
             raise  # re-raise the exception
 
-        return [ImageDetail(guid=row[0], filename=row[1], prompt=row[2]) for row in rows]
+        return [ImageDetail(**result) for result in results]
 
-    def get_image_file(self, guid):
+    def get_image_file(self, guid) -> str:
         db_context = get_current_db_context()
         if not db_context:
             raise DBConnectionError()
         try:
-            db_context.cursor.execute("SELECT filename FROM images WHERE guid = %s", guid)
+            db_context.cursor.execute("SELECT filename FROM images WHERE guid = %s", (guid,))
             result = db_context.cursor.fetchone()  # fetch the result
+            print(result)
+            result = result.get("filename")
         except Exception as e:
             db_context.rollback_transaction()
             raise  # re-raise the exception
         if result:
-            return result[1]
+            return result
         return None
+
 

@@ -1,3 +1,4 @@
+import os
 from typing import List, Optional
 from pydantic import BaseModel
 from core.models import ImageDetail, ImageDetailCreate
@@ -139,11 +140,11 @@ class ImageService(ImageServiceInterface):
         with DatabaseContext() as db:
             try:
                 db.begin_transaction()
-                filename = self.image_repository.get_image_file(guid)
+                image_file = self.image_repository.get_image_file(guid)
                 db.commit_transaction()
-                if filename is None:
+                if image_file is None:
                     raise RecordNotFoundError()
-                return filename
+                return image_file
             except PixyProxyException as known_exc:
                 traceback.print_exc()
                 db.rollback_transaction()

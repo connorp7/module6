@@ -1,6 +1,8 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
+from starlette.responses import FileResponse
+
 from core.models import ImageDetail, ImageDetailCreate
 from service.image_service import ImageServiceInterface
 from web.dependencies import get_image_service
@@ -37,6 +39,9 @@ def get_all_images(service: ImageServiceInterface = Depends(get_image_service)):
 @router.get("/{guid}/content", status_code=200)
 def get_image_file(guid: str, service: ImageServiceInterface = Depends(get_image_service)):
     try:
-        return service.get_image_file(guid)
+        image_file_path = "C:/Users/Connor/AIToolsForSWDelivery/module6/module6/PixyProxy/images/"
+        image_file_path += service.get_image_file(guid)
+        return FileResponse(image_file_path, media_type="image/png")
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=400, detail=str(e))
