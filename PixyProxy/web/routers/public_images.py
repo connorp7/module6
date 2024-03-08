@@ -43,5 +43,4 @@ def get_image_file(guid: str, service: ImageServiceInterface = Depends(get_image
         image_file_path += service.get_image_file(guid)
         return FileResponse(image_file_path, media_type="image/png")
     except Exception as e:
-        print(e)
         raise HTTPException(status_code=400, detail=str(e))

@@ -84,7 +84,6 @@ class MySQLImageRepository(ImageRepositoryInterface):
         try:
             db_context.cursor.execute("SELECT filename FROM images WHERE guid = %s", (guid,))
             result = db_context.cursor.fetchone()  # fetch the result
-            print(result)
             result = result.get("filename")
         except Exception as e:
             db_context.rollback_transaction()
